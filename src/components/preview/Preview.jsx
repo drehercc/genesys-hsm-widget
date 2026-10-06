@@ -21,52 +21,93 @@ export default function Preview({ template, parameters }) {
 
 
     function getPreview() {
-        // const template = getSelectedTemplate()
+
         let textoFinal = ''
         let textoHeader = ''
         let textoBody = ''
         let textoFooter = ''
+
         if (!template) {
             return textoFinal
         }
-        const regex = /{{\w*}}/g;
+
+        const regex = /{{\w*}}/g
         const whatsApp = template.messagingTemplate.whatsApp
 
+        // HEADER
         if (whatsApp.header && whatsApp.header.type == "Text") {
-            textoHeader = whatsApp.header.content;
-            const headerParams = whatsApp.header.content.match(regex) ?? [];
+
+            textoHeader = whatsApp.header.content
+
+            const headerParams =
+                whatsApp.header.content.match(regex) ?? []
+
             if (headerParams.length > 0) {
 
                 for (let i = 0; i < headerParams.length; i++) {
-                    let numero = headerParams[i].replace('{{', '').replace('}}', '')
 
-                    if (parameters[numero + 'HEADER']?.value) {
-                        textoHeader = textoHeader.replace(headerParams[i], parameters[numero + 'HEADER'].value)
-                    }
-                    else {
-                        textoHeader = textoHeader.replace(headerParams[i], `{{${numero}}}`)
-                    }
+                    let key = headerParams[i]
+                        .replace('{{', '')
+                        .replace('}}', '')
 
+                    if (parameters[key]) {
+
+                        textoHeader = textoHeader.replace(
+                            headerParams[i],
+                            parameters[key]
+                        )
+
+                    } else {
+
+                        textoHeader = textoHeader.replace(
+                            headerParams[i],
+                            `{{${key}}}`
+                        )
+                    }
                 }
             }
         }
 
 
+        // BODY
         for (let i = 0; i < template.texts.length; i++) {
-            textoBody = textoBody.concat(template.texts[i].content)
-            const bodyParams = template.texts[i].content.match(regex) ?? []
+
+            textoBody = textoBody.concat(
+                template.texts[i].content
+            )
+
+            const bodyParams =
+                template.texts[i].content.match(regex) ?? []
 
             for (let y = 0; y < bodyParams.length; y++) {
 
-                let numero = bodyParams[y].replace('{{', '').replace('}}', '')
-                textoBody = parameters[numero + 'BODY']?.value ? textoBody.replace(bodyParams[y], parameters[numero + 'BODY'].value) : textoBody.replace(bodyParams[y], `{{${numero}}}`)
-            }
+                let key = bodyParams[y]
+                    .replace('{{', '')
+                    .replace('}}', '')
 
+                if (parameters[key]) {
+
+                    textoBody = textoBody.replace(
+                        bodyParams[y],
+                        parameters[key]
+                    )
+
+                } else {
+
+                    textoBody = textoBody.replace(
+                        bodyParams[y],
+                        `{{${key}}}`
+                    )
+                }
+            }
         }
 
+
+        // FOOTER
         if (whatsApp.messageFooter) {
             textoFooter = whatsApp.messageFooter.content
         }
+
 
         textoFinal = [
             textoHeader,
@@ -77,7 +118,6 @@ export default function Preview({ template, parameters }) {
             .join('\n\n')
 
         return textoFinal
-
     }
 
 
@@ -108,12 +148,10 @@ export default function Preview({ template, parameters }) {
                         backgroundColor: '#fff',
                         borderRadius: '8px',
                         padding: '10px',
-                        maxWidth: "90%",
+                        maxWidth: '90%',
                         boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
                     }}
-
                 >
-
                     <TextareaAutosize
                         value={getPreview()}
                         readOnly
@@ -122,7 +160,6 @@ export default function Preview({ template, parameters }) {
                             width: '100%',
                             boxSizing: 'border-box',
                             padding: '14px',
-                            // fontWeight: 'bold',
                             fontFamily: 'inherit',
                             fontSize: '14px',
                             lineHeight: 1.5,
@@ -134,7 +171,6 @@ export default function Preview({ template, parameters }) {
                             resize: 'none',
                         }}
                     />
-
 
                     {getButtons().length > 0 && (
                         <Box
@@ -163,14 +199,9 @@ export default function Preview({ template, parameters }) {
                         </Box>
                     )}
                 </Box>
-
-
             </Box>
-
         </Box>
     )
-
-
 
 
 

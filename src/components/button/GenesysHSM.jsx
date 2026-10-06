@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import { getMessageTemplates, postDataAction } from '../../utils/genesysCloudUtils.js';
 
 
-function TemplateButton(props) {
+function GenesysHSM(props) {
 
     //console.log(props.name)
     const [templates, setTemplates] = useState([])
@@ -51,6 +51,20 @@ function TemplateButton(props) {
     //         template => template.id === templateId
     //     )
     // }
+
+    function parametrosPreenchidos() {
+
+
+        if (!template.substitutions) {
+            return true
+        }
+
+        if (Object.keys(parameters).length != template.substitutions.length) {
+            return false
+        }
+
+        return Object.keys(parameters).every(param => Boolean(parameters[param]))
+    }
 
     async function handleEnviar() {
         if (!template || !numeroDestino) {
@@ -205,7 +219,7 @@ function TemplateButton(props) {
                                 enviando ||
                                 !template ||
                                 !numeroDestino
-                                || Object.keys(parameters).length != (template?.substitutions?.length || 0)
+                                || !parametrosPreenchidos()
                             }
                             startIcon={
                                 enviando
@@ -237,4 +251,4 @@ function TemplateButton(props) {
 
 }
 
-export default TemplateButton
+export default GenesysHSM

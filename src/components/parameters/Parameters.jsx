@@ -3,39 +3,18 @@ import {
     Typography,
     Stack,
     TextField
-
 } from '@mui/material'
 
 export default function Parameters({ template, parameters, setParameters }) {
 
     function getParams() {
-
         if (!template) {
             return []
         }
 
-        const templateParams = []
-        // const template = getSelectedTemplate()
-        const regex = /{{\w*}}/g;
-        const whatsApp = template.messagingTemplate.whatsApp
+        console.log(template.substitutions)
 
-        if (whatsApp.header && whatsApp.header.type == "Text") {
-            const headerParams = whatsApp.header.content.match(regex) ?? [];
-            if (headerParams.length > 0) {
-                templateParams.push({ type: "HEADER", fields: headerParams })
-            }
-
-        }
-
-        for (let i = 0; i < template.texts.length; i++) {
-            const bodyParams = template.texts[i].content.match(regex) ?? []
-            if (bodyParams.length > 0) {
-                templateParams.push({ type: "BODY", fields: bodyParams })
-            }
-
-        }
-        //console.log(templateParams)
-        return templateParams
+        return template.substitutions
     }
 
     return (
@@ -60,70 +39,25 @@ export default function Parameters({ template, parameters, setParameters }) {
             </Typography>
 
             <Stack spacing={1.5}>
-                {getParams().map((param) => {
-                    return (
-                        <Box key={param.type}>
+                {getParams().map((substitution) => (
+                    <TextField
+                        key={substitution.id}
+                        fullWidth
+                        size="small"
+                        label={substitution.id}
+                        variant="outlined"
+                        value={parameters[substitution.id] ?? ''}
+                        onChange={(e) => {
+                            const value = e.target.value
 
-                            {param.fields.map((field) => {
-
-                                const formatedField = field
-                                    .replace('{{', '')
-                                    .replace('}}', '')
-
-                                return (
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        label={param.type}
-                                        key={`${param.type}_${field}`}
-                                        variant="outlined"
-                                        value={
-                                            parameters[
-                                                formatedField + param.type
-                                            ]?.value ?? ''
-                                        }
-                                        onChange={(e) => {
-                                            const value = e.target.value
-
-                                            setParameters((prev) => {
-                                                const temp = { ...prev }
-                                                const key = formatedField + param.type
-
-                                                if (!value) {
-                                                    delete temp[key]
-                                                } else {
-                                                    temp[key] = {
-                                                        value,
-                                                        type: 'text'
-                                                    }
-                                                }
-
-                                                return temp
-                                            })
-                                        }}
-                                    >
-                                        {field}
-                                    </TextField>
-                                )
-
-                            })}
-                        </Box>
-                    )
-
-
-                })}
+                            setParameters(prev => ({
+                                ...prev,
+                                [substitution.id]: value
+                            }))
+                        }}
+                    />
+                ))}
             </Stack>
         </Box>
-
-
     )
-
-
-
-
-
-
-
-
-
 }

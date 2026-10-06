@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { authenticate, getUserMe } from './utils/genesysCloudUtils.js'
 import './App.css'
-import TemplateButton from './components/button/TemplateButton2'
+import GenesysHSM from './components/button/GenesysHSM.jsx'
 import { CircularProgress, Box, Skeleton } from '@mui/material';
 function App() {
     const [initialized, setInitialized] = useState(false)
@@ -51,7 +51,7 @@ function App() {
         return (
             <Box
                 sx={{
-                    width : '100%',
+                    width: '100%',
                     height: '100%',
                     textAlign: 'center',
                     display: 'flex',
@@ -83,7 +83,7 @@ function App() {
                 justifyContent: 'center',
             }}
         >
-            <TemplateButton
+            <GenesysHSM
                 name={name}
             />
         </Box>
