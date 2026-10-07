@@ -15,7 +15,9 @@ import Preview from '../preview/Preview.jsx';
 import Parameters from '../parameters/Parameters.jsx';
 import IntegrationChoice from '../integration_choice/IntegrationChoice.jsx';
 import { useEffect, useState } from 'react'
-import { getMessageTemplates, postDataAction } from '../../utils/genesysCloudUtils.js';
+import { getMessageMessage, getMessageTemplates, postDataAction } from '../../utils/genesysCloudUtils.js';
+
+
 
 
 function GenesysHSM(props) {
@@ -29,7 +31,7 @@ function GenesysHSM(props) {
     const [parameters, setParameters] = useState({})
     const [enviando, setEnviando] = useState(false)
     const [erro, setErro] = useState(null)
-
+    const [sucesso, setSucesso] = useState(false)
 
 
     useEffect(() => {
@@ -52,6 +54,9 @@ function GenesysHSM(props) {
     //     )
     // }
 
+
+
+
     function parametrosPreenchidos() {
 
 
@@ -67,6 +72,7 @@ function GenesysHSM(props) {
     }
 
     async function handleEnviar() {
+        setSucesso(false)
         if (!template || !numeroDestino) {
             setErro('Selecione um template e informe o número de destino.')
             return
@@ -76,10 +82,9 @@ function GenesysHSM(props) {
             setEnviando(true)
             setErro(null)
             const bodyParameters = []
-            Object.keys(parameters).forEach((value) => {
-                const key = value.replace("BODY", "").replace("HEADER", "").replace("FOOTER", "")
+            Object.keys(parameters).forEach((key) => {
 
-                bodyParameters.push({ id: key, value: parameters[value].value })
+                bodyParameters.push({ id: key, value: parameters[key] })
 
 
             })
@@ -96,16 +101,21 @@ function GenesysHSM(props) {
             }
 
 
-            console.log({
-                template,
-                numeroDestino,
-            })
+            // console.log({
+            //     template,
+            //     numeroDestino,
+            // })
 
-            await postDataAction(body)
+            const hsmResponse = await postDataAction(body)
+            await getMessageMessage(hsmResponse.conversationId, hsmResponse.id)
+            setSucesso(true)
+
+
 
         } catch (err) {
             console.error(err)
-            setErro('Não foi possível enviar o template.')
+            setErro(err.message || String(err))
+            setSucesso(false)
         } finally {
             setEnviando(false)
         }
@@ -236,9 +246,13 @@ function GenesysHSM(props) {
                         >
                             {enviando ? 'Enviando...' : 'Enviar'}
                         </Button>
-
+                        {sucesso && (
+                            <Alert variant="filled" severity="success">
+                                Mensagem enviada com sucesso para o número {numeroDestino}
+                            </Alert>
+                        )}
                         {erro && (
-                            <Alert severity="error">
+                            <Alert variant="filled" severity="error">
                                 {erro}
                             </Alert>
                         )}

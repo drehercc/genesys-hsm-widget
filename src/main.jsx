@@ -6,12 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import AuthPopup from './components/auth/Auth.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/callback/oauth" element={<AuthPopup />} />
       </Routes>
     </BrowserRouter>
-  </StrictMode>
+  // </StrictMode>
 )

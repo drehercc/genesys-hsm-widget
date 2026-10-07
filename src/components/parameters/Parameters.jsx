@@ -12,7 +12,7 @@ export default function Parameters({ template, parameters, setParameters }) {
             return []
         }
 
-        console.log(template.substitutions)
+        // console.log(template.substitutions)
 
         return template.substitutions
     }

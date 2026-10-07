@@ -4,7 +4,7 @@ export default function AuthPopup() {
     const authCalled = useRef(false)
 
     useEffect(() => {
-        const autoCloseDelay = 1000;
+        const autoCloseDelay = 100000;
 
         const messageTargetOrigin = "https://homomorphous-bibi-subradular.ngrok-free.dev";
 
@@ -23,7 +23,8 @@ export default function AuthPopup() {
                     console.error("Not a popup window");
                     return;
                 }
-
+                console.log("AUTH POP_UP ABERTO")
+                console.log(authMessage)
                 window.opener.postMessage(
                     authMessage,
                     messageTargetOrigin

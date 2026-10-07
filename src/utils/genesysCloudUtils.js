@@ -3,7 +3,8 @@ import { clientConfig } from '../clientconfig';
 
 
 const client = platformClient.ApiClient.instance
-const { clientId, redirectUri, environment, libraryId } = clientConfig;
+
+const { clientId, redirectUri, environment, libraryId, organizationId, org } = clientConfig;
 
 // const searchApi = new platformClient.SearchApi();
 const usersApi = new platformClient.UsersApi();
@@ -19,10 +20,10 @@ const cache = {};
 //default values
 const authPopUpConfiguration = {
     "usePopup": true,
-    "popupTimeout": 120000,
+    "popupTimeout": 4000,
     "notifyPopup": false,
     "autoClosePopup": true,
-    "autoClosePopupDelay": 1000,
+    "autoClosePopupDelay": 4000,
     "popupTarget": "_blank",
     "popupWindowFeatures": "popup=true,width=600,height=500",
     "overridePopupUrl": undefined,
@@ -43,6 +44,18 @@ client.onAuthPopupStatus = (status, msg, identifier) => {
     // status == "ABORTED" : Authentication Aborted -> sets UI
     // status == "REDIRECTING" : About to replace location url -> sets UI
 }
+
+
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function delay(time) {
+    await sleep(time * 1000)
+}
+
+
 async function withAuthentication(apiCall) {
     try {
         console.log('[AUTH] Executando API call...');
@@ -70,16 +83,32 @@ async function withAuthentication(apiCall) {
     }
 }
 export async function authenticate() {
-    client.setEnvironment(environment);
-    // client.setAccessToken()
-    return client.loginPKCEGrant(
-        clientId,
-        redirectUri,
-        { state: 'state' }
-    )
+    console.log('[AUTH] >>> authenticate() INICIADO')
+
+    client.setEnvironment(environment)
+
+    try {
+        const result = await client.loginPKCEGrant(
+            clientId,
+            redirectUri,
+            {
+                target: organizationId,
+                skipTest: true
+            }
+        )
+
+        console.log('[AUTH] <<< loginPKCEGrant() SUCESSO')
+
+        return result
+    } catch (error) {
+        console.error('[AUTH] <<< loginPKCEGrant() ERRO', error)
+        throw error
+    }
 }
 
 export async function getUserMe(skipCache = false) {
+
+    console.log("GET_USER_ME")
     if (skipCache) {
         return usersApi.getUsersMe({
             expand: ['routingStatus', 'presence'],
@@ -89,8 +118,8 @@ export async function getUserMe(skipCache = false) {
     } else {
         try {
             cache['userMe'] = await withAuthentication(() => usersApi.getUsersMe({
-                    expand: ['routingStatus', 'presence'],
-                }))
+                expand: ['routingStatus', 'presence'],
+            }))
 
             return cache['userMe'];
         } catch (err) {
@@ -108,7 +137,7 @@ export async function getMessageIntegrations() {
         };
         const response = await withAuthentication(() => conversationsApi.getConversationsMessagingIntegrationsWhatsapp(opts))
         // const response = await conversationsApi.getConversationsMessagingIntegrationsWhatsapp(opts)
-        console.log(response)
+        // console.log(response)
         // const response = await conversationsApi.getConversationsMessagingIntegrations(opts)
         return response.entities.filter(entity => entity.status == "Active").map((integration) => {
             const { id, phoneNumber, name } = integration
@@ -122,6 +151,7 @@ export async function getMessageIntegrations() {
     }
 
 }
+
 
 export async function getMessageTemplates() {
     // String | Library ID
@@ -145,12 +175,45 @@ export async function getMessageTemplates() {
 
 }
 
+export async function getMessageMessage(conversationId, messageId) {
+    let response
+    let finalReceipt
+
+    do {
+        await delay(2)
+        response = await withAuthentication(() => conversationsApi.getConversationsMessageMessage(
+            conversationId,
+            messageId
+        ))
+
+
+        finalReceipt = response.normalizedReceipts?.at(-1)?.isFinalReceipt
+
+        console.log(response)
+
+    } while (response.status === "queued" || !finalReceipt)
+
+    if (response.status === "delivery-failed") {
+        const failedReceipt = response.normalizedReceipts?.find(
+            receipt => receipt.status === "Failed"
+        )
+
+        const reasons = failedReceipt?.reasons
+
+        throw new Error(
+            reasons
+                ? JSON.stringify(reasons)
+                : 'Falha na entrega da mensagem.'
+        )
+    }
+}
+
 export async function postDataAction(body) {
 
 
     let actionId = "custom_-_4068ed47-5203-484b-90ec-f9378ef043a1"; // String | actionId
     let genesysBody = { body: JSON.stringify(body) }; // {String: Object} | Map of parameters used for variable substitution.
-    console.log(genesysBody)
+    // console.log(genesysBody)
 
     let opts = {
         "flatten": false // Boolean | Indicates the response should be reformatted, based on Architect's flattening format.
@@ -160,7 +223,9 @@ export async function postDataAction(body) {
 
     const response = await withAuthentication(() => integrationsApi.postIntegrationsActionExecute(actionId, genesysBody, opts))
     // const response = await integrationsApi.postIntegrationsActionExecute(actionId, genesysBody, opts)
-    console.log(response)
+    const jsonResponse = JSON.parse(response.response)
+    console.log(jsonResponse)
+    return jsonResponse;
 
 
 }
