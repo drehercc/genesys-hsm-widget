@@ -4,7 +4,7 @@ export default function AuthPopup() {
     const authCalled = useRef(false)
 
     useEffect(() => {
-        const autoCloseDelay = 100000;
+        const autoCloseDelay = 0;
 
         const messageTargetOrigin = "https://homomorphous-bibi-subradular.ngrok-free.dev";
 
