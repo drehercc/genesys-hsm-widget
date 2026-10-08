@@ -16,7 +16,7 @@ export default function IntegrationChoice({ setErro, integration, setIntegration
     useEffect(() => {
         getMessageIntegrations()
             .then(resposta => {
-                console.log(resposta)
+                // console.log(resposta)
                 setIntegrations(resposta)
             })
             .catch(erro => {

@@ -7,6 +7,7 @@ export default function AuthPopup() {
         const autoCloseDelay = 0;
 
         const messageTargetOrigin = "https://homomorphous-bibi-subradular.ngrok-free.dev";
+        // const messageTargetOrigin = "https://dp732tprjm24k.cloudfront.net";
 
         const start = () => {
             authCalled.current = true
@@ -23,8 +24,8 @@ export default function AuthPopup() {
                     console.error("Not a popup window");
                     return;
                 }
-                console.log("AUTH POP_UP ABERTO")
-                console.log(authMessage)
+                // console.log("AUTH POP_UP ABERTO")
+                // console.log(authMessage)
                 window.opener.postMessage(
                     authMessage,
                     messageTargetOrigin

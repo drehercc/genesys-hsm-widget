@@ -20,10 +20,10 @@ const cache = {};
 //default values
 const authPopUpConfiguration = {
     "usePopup": true,
-    "popupTimeout": 4000,
+    "popupTimeout": 120000,
     "notifyPopup": false,
     "autoClosePopup": true,
-    "autoClosePopupDelay": 4000,
+    "autoClosePopupDelay": 3000,
     "popupTarget": "_blank",
     "popupWindowFeatures": "popup=true,width=600,height=500",
     "overridePopupUrl": undefined,
@@ -37,7 +37,8 @@ const authPopUpConfiguration = {
 client.updateAuthPopupConfiguration(authPopUpConfiguration)
 
 client.onAuthPopupStatus = (status, msg, identifier) => {
-    console.log(`AUTH POPUP STATUS RECEIVED: status=${status}, msg=${msg}, identifier=${identifier}`);
+    console.log(`AUTH POPUP STATUS RECEIVED: status=${status}, msg=${msg}`);
+    // console.log(`AUTH POPUP STATUS RECEIVED: status=${status}, msg=${msg}, identifier=${identifier}`);
     // status == "INIT": Authentication Popup in progress -> sets UI
     // status == "ERROR" | "AUTH_ERROR" | "TIMEOUT" : Authentication Error -> sets UI
     // status == "AUTHENTICATED" : Authentication Success -> sets UI
@@ -60,7 +61,7 @@ async function withAuthentication(apiCall) {
     try {
         console.log('[AUTH] Executando API call...');
         const response = await apiCall();
-        console.log('[AUTH] API call terminou com sucesso');
+        // console.log('[AUTH] API call terminou com sucesso');
 
         return response;
     } catch (error) {
@@ -108,7 +109,6 @@ export async function authenticate() {
 
 export async function getUserMe(skipCache = false) {
 
-    console.log("GET_USER_ME")
     if (skipCache) {
         return usersApi.getUsersMe({
             expand: ['routingStatus', 'presence'],

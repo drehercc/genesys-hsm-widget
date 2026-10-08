@@ -176,6 +176,7 @@ function GenesysHSM(props) {
                                 )
 
                                 setTemplate(selected)
+                                setParameters({})
                             }}
                             fullWidth
                             size="small"

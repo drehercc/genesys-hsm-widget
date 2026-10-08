@@ -14,7 +14,11 @@ export default function Parameters({ template, parameters, setParameters }) {
 
         // console.log(template.substitutions)
 
-        return template.substitutions
+        return template.substitutions ?? []
+    }
+
+    if (getParams().length === 0) {
+        return null
     }
 
     return (
@@ -37,6 +41,7 @@ export default function Parameters({ template, parameters, setParameters }) {
             >
                 Preencha os parâmetros
             </Typography>
+
 
             <Stack spacing={1.5}>
                 {getParams().map((substitution) => (
